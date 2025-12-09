@@ -3,9 +3,9 @@ FROM node:18-bullseye-slim as build
 
 WORKDIR /app
 
-# Install dependencies (use ci for consistent installs)
+# Install dependencies (npm install works even if lockfile missing)
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 # Copy source and build
 COPY . .

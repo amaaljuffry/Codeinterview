@@ -45,16 +45,33 @@ jobs:
             echo "Deployment triggered via Render webhook"
             # Render auto-deploys on push to main branch
 
+  build-docker:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Create dummy .env
+          command: |
+            echo "DATABASE_URL=postgresql://user:pass@localhost:5432/db" > backend/.env
+      - run:
+          name: Build Docker containers
+          command: |
+            docker-compose build
+
 workflows:
   version: 2
   test-and-deploy:
     jobs:
       - test-backend
       - test-frontend
+      - build-docker
       - deploy:
           requires:
             - test-backend
             - test-frontend
+            - build-docker
           filters:
             branches:
               only: main
