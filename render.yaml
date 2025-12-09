@@ -22,7 +22,6 @@ services:
   - type: web
     name: codeinterview-frontend
     env: static
-    region: singapore
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     routes:
@@ -31,7 +30,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          name: codeinterview-backend
-          type: web
-          property: url
+        sync: false
