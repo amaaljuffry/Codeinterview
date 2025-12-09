@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Code2, Mail, Lock, User, ArrowRight } from 'lucide-react'
 import { RetroButton, RetroCard, RetroContainer, RetroHeading } from '../components/RetroUI'
+import { API_BASE } from '../lib'
 
 export default function Signup() {
   const [name, setName] = useState('')
@@ -17,7 +18,7 @@ export default function Signup() {
     setLoading(true)
     if (password.length < 6) { setError('Password must be at least 6 characters'); setLoading(false); return }
     try {
-      const res = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) })
+      const res = await fetch(`${API_BASE}/auth/signup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Signup failed'); return }
       localStorage.setItem('token', data.token)

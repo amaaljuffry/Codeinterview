@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { User, ChevronLeft, Save, Mail, Settings, Bell, Moon, Calendar, FileQuestion, LogOut, Camera, X } from 'lucide-react'
 import { RetroButton, RetroCard, RetroContainer, RetroNavbar, RetroHeading, RetroToggle, RetroInput } from '../components/RetroUI'
 import { retroToast } from '../components/RetroToast'
+import { API_BASE } from '../lib'
 
 // Helper function to get user initials
 const getInitials = (name, email) => {
@@ -107,7 +108,7 @@ export default function Profile() {
 
       // Fetch latest user data including preferences from backend
       try {
-        const res = await fetch(`/api/users/${userData.id}`, {
+        const res = await fetch(`${API_BASE}/users/${userData.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         
@@ -154,7 +155,7 @@ export default function Profile() {
     setSaving(true)
     
     try {
-      const res = await fetch(`/api/users/${user.id}`, {
+      const res = await fetch(`${API_BASE}/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +185,7 @@ export default function Profile() {
     const token = localStorage.getItem('token')
     
     try {
-      const res = await fetch(`/api/users/${user.id}/preferences`, {
+      const res = await fetch(`${API_BASE}/users/${user.id}/preferences`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

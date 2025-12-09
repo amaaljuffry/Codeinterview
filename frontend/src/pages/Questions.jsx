@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Code2, Plus, FileQuestion, Search, Edit, Trash2, ChevronLeft, Calendar, Settings, LogOut, UserCog, ChevronDown } from 'lucide-react'
 import { RetroButton, RetroCard, RetroContainer, RetroNavbar, RetroHeading, RetroBadge, RetroEmptyState } from '../components/RetroUI'
+import { API_BASE } from '../lib'
 
 export default function Questions() {
   const [questions, setQuestions] = useState([])
@@ -17,17 +18,17 @@ export default function Questions() {
   useEffect(() => { fetchQuestions() }, [difficulty])
 
   const fetchQuestions = async () => {
-    try { const params = new URLSearchParams(); if (difficulty) params.append('difficulty', difficulty); const res = await fetch(`/api/questions?${params}`); if (res.ok) setQuestions(await res.json()) } catch (err) { console.error(err) } finally { setLoading(false) }
+    try { const params = new URLSearchParams(); if (difficulty) params.append('difficulty', difficulty); const res = await fetch(`${API_BASE}/questions?${params}`); if (res.ok) setQuestions(await res.json()) } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
   const handleSubmit = async () => {
     const token = localStorage.getItem('token')
     if (!token) { alert('Please login'); navigate('/login'); return }
-    try { const res = await fetch(editingId ? `/api/questions/${editingId}` : '/api/questions', { method: editingId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form) }); if (res.ok) { setShowForm(false); setEditingId(null); setForm({ title: '', description: '', difficulty: 'medium', category: '' }); fetchQuestions() } } catch (err) { alert('Failed') }
+    try { const res = await fetch(editingId ? `${API_BASE}/questions/${editingId}` : `${API_BASE}/questions`, { method: editingId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form) }); if (res.ok) { setShowForm(false); setEditingId(null); setForm({ title: '', description: '', difficulty: 'medium', category: '' }); fetchQuestions() } } catch (err) { alert('Failed') }
   }
 
   const handleEdit = (q) => { setForm({ title: q.title, description: q.description, difficulty: q.difficulty, category: q.category || '' }); setEditingId(q.id); setShowForm(true) }
-  const handleDelete = async (id) => { if (!confirm('Delete?')) return; await fetch(`/api/questions/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }); setQuestions(questions.filter(q => q.id !== id)) }
+  const handleDelete = async (id) => { if (!confirm('Delete?')) return; await fetch(`${API_BASE}/questions/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }); setQuestions(questions.filter(q => q.id !== id)) }
   const handleLogout = () => { localStorage.clear(); navigate('/') }
 
   const filtered = questions.filter(q => q.title.toLowerCase().includes(search.toLowerCase()))

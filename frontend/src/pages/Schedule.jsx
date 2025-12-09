@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Calendar, Plus, ChevronLeft, Clock, Mail, Trash2, Video, FileQuestion, Settings, LogOut, UserCog, ChevronDown } from 'lucide-react'
 import { RetroButton, RetroCard, RetroContainer, RetroNavbar, RetroHeading, RetroBadge, RetroEmptyState } from '../components/RetroUI'
+import { API_BASE } from '../lib'
 
 export default function Schedule() {
   const [schedules, setSchedules] = useState([])
@@ -12,9 +13,9 @@ export default function Schedule() {
   const navigate = useNavigate()
 
   useEffect(() => { const token = localStorage.getItem('token'); if (!token) { navigate('/login'); return }; fetchSchedules(token) }, [])
-  const fetchSchedules = async (token) => { try { const res = await fetch('/api/schedule', { headers: { 'Authorization': `Bearer ${token}` } }); if (res.ok) setSchedules(await res.json()) } catch (err) { console.error(err) } finally { setLoading(false) } }
-  const handleSubmit = async () => { const token = localStorage.getItem('token'); if (!form.candidateEmail || !form.scheduledAt) { alert('Fill required fields'); return }; try { const res = await fetch('/api/schedule', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form) }); if (res.ok) { setShowForm(false); setForm({ title: '', candidateEmail: '', scheduledAt: '', duration: 60, notes: '' }); fetchSchedules(token) } } catch (err) { alert('Failed') } }
-  const handleCancel = async (id) => { if (!confirm('Cancel?')) return; await fetch(`/api/schedule/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }); setSchedules(schedules.map(s => s.id === id ? { ...s, status: 'cancelled' } : s)) }
+  const fetchSchedules = async (token) => { try { const res = await fetch(`${API_BASE}/schedule`, { headers: { 'Authorization': `Bearer ${token}` } }); if (res.ok) setSchedules(await res.json()) } catch (err) { console.error(err) } finally { setLoading(false) } }
+  const handleSubmit = async () => { const token = localStorage.getItem('token'); if (!form.candidateEmail || !form.scheduledAt) { alert('Fill required fields'); return }; try { const res = await fetch(`${API_BASE}/schedule`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form) }); if (res.ok) { setShowForm(false); setForm({ title: '', candidateEmail: '', scheduledAt: '', duration: 60, notes: '' }); fetchSchedules(token) } } catch (err) { alert('Failed') } }
+  const handleCancel = async (id) => { if (!confirm('Cancel?')) return; await fetch(`${API_BASE}/schedule/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }); setSchedules(schedules.map(s => s.id === id ? { ...s, status: 'cancelled' } : s)) }
   const handleLogout = () => { localStorage.clear(); navigate('/') }
   const statusVariants = { scheduled: 'primary', completed: 'success', cancelled: 'destructive' }
   const upcoming = schedules.filter(s => s.status === 'scheduled'), past = schedules.filter(s => s.status !== 'scheduled')

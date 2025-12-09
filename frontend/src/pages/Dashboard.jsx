@@ -4,6 +4,7 @@ import { Code2, Plus, Calendar, FileQuestion, Clock, ChevronRight, Trash2, Play,
 import { RetroButton, RetroCard, RetroContainer, RetroNavbar, RetroHeading, RetroBadge, RetroEmptyState, RetroToggle } from '../components/RetroUI'
 import { Table } from '../components/RetroTable'
 import { retroToast } from '../components/RetroToast'
+import { API_BASE } from '../lib'
 
 export default function Dashboard() {
   const [rooms, setRooms] = useState([])
@@ -35,8 +36,8 @@ export default function Dashboard() {
   const fetchData = async (token) => {
     try {
       const [roomsRes, schedulesRes] = await Promise.all([
-        fetch('/api/rooms', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('/api/schedule', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${API_BASE}/rooms`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE}/schedule`, { headers: { 'Authorization': `Bearer ${token}` } })
       ])
       if (roomsRes.ok) setRooms(await roomsRes.json())
       if (schedulesRes.ok) setSchedules(await schedulesRes.json())
@@ -58,7 +59,7 @@ export default function Dashboard() {
     setCreating(true)
     try {
       // Create room
-      const roomRes = await fetch('/api/rooms', {
+      const roomRes = await fetch(`${API_BASE}/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ name: roomForm.name.trim(), language: roomForm.language })
@@ -67,7 +68,7 @@ export default function Dashboard() {
 
       // If scheduled, also create schedule entry
       if (roomForm.scheduleForLater) {
-        await fetch('/api/schedule', {
+        await fetch(`${API_BASE}/schedule`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({
@@ -95,7 +96,7 @@ export default function Dashboard() {
     if (!confirm('Delete this room?')) return
     const token = localStorage.getItem('token')
     try {
-      await fetch(`/api/rooms/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
+      await fetch(`${API_BASE}/rooms/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
       setRooms(rooms.filter(r => r.id !== id))
       retroToast.success('Room deleted successfully')
     } catch (err) {

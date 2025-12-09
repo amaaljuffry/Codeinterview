@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Code2, Users, Play, Zap, Calendar, FileQuestion, ArrowRight, ChevronDown, LayoutDashboard, UserCog, LogOut, Sparkles } from 'lucide-react'
 import { RetroButton, RetroCard, RetroContainer, RetroSection, RetroNavbar, RetroHeading, RetroFeatureCard, RetroInput } from '../components/RetroUI'
+import { API_BASE } from '../lib'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
@@ -25,7 +26,7 @@ export default function Home() {
     }
     setLoading(true)
     try {
-      const res = await fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ language: 'javascript' }) })
+      const res = await fetch(`${API_BASE}/rooms`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ language: 'javascript' }) })
       const data = await res.json()
       navigate(`/room/${data.roomId}`)
     } catch (err) { console.error('Failed:', err); alert('Failed to create room') }
