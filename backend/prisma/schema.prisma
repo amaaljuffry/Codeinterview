@@ -1,0 +1,105 @@
+// Prisma schema for Code Interview Platform
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model for authentication
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String
+  name        String?
+  role        String    @default("user") // user, admin, interviewer
+  profilePicture String? // URL to user's profile picture
+  preferences Json?     // User preferences (theme, notifications, etc.)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  ownedRooms    Room[]        @relation("RoomOwner")
+  participants  Participant[]
+  schedules     Schedule[]    @relation("Interviewer")
+  questions     Question[]    @relation("QuestionAuthor")
+}
+
+// Room model for code interview sessions
+model Room {
+  id          String      @id @default(cuid())
+  name        String?
+  language    String      @default("javascript")
+  code        String?     @db.Text
+  status      String      @default("waiting") // waiting, active, ended
+  startedAt   DateTime?
+  endedAt     DateTime?
+  ownerId     String?
+  questionId  String?
+  
+  owner       User?         @relation("RoomOwner", fields: [ownerId], references: [id])
+  question    Question?     @relation(fields: [questionId], references: [id])
+  participants Participant[]
+  schedules   Schedule[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Participant in a room session
+model Participant {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  role      String   @default("candidate") // candidate, interviewer, observer
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+  
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([roomId, userId])
+}
+
+// Interview Question model
+model Question {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  difficulty  String   @default("medium") // easy, medium, hard
+  category    String?  // arrays, strings, trees, etc.
+  starterCode Json?    // { javascript: "...", python: "..." }
+  testCases   Json?    // [{ input: "...", expected: "..." }]
+  authorId    String?
+  
+  author      User?    @relation("QuestionAuthor", fields: [authorId], references: [id])
+  rooms       Room[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Interview Schedule model
+model Schedule {
+  id            String    @id @default(cuid())
+  title         String?
+  candidateEmail String
+  interviewerId String
+  roomId        String?
+  scheduledAt   DateTime
+  duration      Int       @default(60) // minutes
+  status        String    @default("scheduled") // scheduled, completed, cancelled
+  notes         String?   @db.Text
+  
+  interviewer   User      @relation("Interviewer", fields: [interviewerId], references: [id])
+  room          Room?     @relation(fields: [roomId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
